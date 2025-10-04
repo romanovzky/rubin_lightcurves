@@ -89,7 +89,8 @@ Edit `config_file.json`:
 ```
 
 - `model` / `system_type` are paired (see [Models](#models)).
-- `t0_range` (JD) sets the window to draw event peaks \(t_0\). If "t0_range": false is set, then t0 is sampled from a uniform distribution between [time_start-0.5tE, time_end+0.5tE]. Here time_start and time_end correspond to the minimum and maximum dates in the OpSim for the Bulge..
+- `t0_range` (JD) sets the window to draw event peaks \(t_0\). If "t0_range": false is set, then time t0 is randomly drawn
+between the 1st and 99th percentiles of the time stamps provided for the OpSim given the line of sight (ra,dec) introduced. Extended by half the Einstein crossing time on either side to allow for values slightly outside the observed data range.
 - `radius` (deg) is the cone search around `(ra, dec)` for TRILEGAL sources.
 - `Ds_max` (pc) filters by distance modulus.
 - `run_parallel`: `true` to use the process pool runner.
