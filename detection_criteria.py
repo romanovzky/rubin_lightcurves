@@ -87,22 +87,49 @@ def FilterNpoints(n, pyLIMA_parameters, pyLIMA_telescopes):
                 critNpts[telo.name] = False
     return any(critNpts.values())
 
-def filter_band(lightcurve, m5, fil):
-    '''
-    * Save the points of the lightcurve greater and smaller than
-      1sigma fainter and brighter that the saturation and 5sigma_depth
-    * check that the lightcurve have more than 10 points
-    * check if the lightcurve have at least 1 point at 5 sigma from the 5sigma_depth
-    '''
-    # print(len(lightcurve))
-    mag_sat = {'W149': 14.8, 'u': 14.7, 'g': 15.7, 'r': 15.8, 'i': 15.8, 'z': 15.3, 'y': 13.9}
-    lightcurve['m5'] =  m5
+# def filter_band(lightcurve, m5, fil):
+#     '''
+#     * Save the points of the lightcurve greater and smaller than
+#       1sigma fainter and brighter that the saturation and 5sigma_depth
+#     * check that the lightcurve have more than 10 points
+#     * check if the lightcurve have at least 1 point at 5 sigma from the 5sigma_depth
+#     '''
+#     # print(len(lightcurve))
+#     mag_sat = {'W149': 14.8, 'u': 14.7, 'g': 15.7, 'r': 15.8, 'i': 15.8, 'z': 15.3, 'y': 13.9}
+#     lightcurve['m5'] =  m5
 
-    b1 = lightcurve['mag'].value - lightcurve['err_mag'].value > mag_sat[fil]
-    b2 = lightcurve['mag'].value + lightcurve['err_mag'].value < lightcurve['m5']
-    lc_fil1 = lightcurve[b1&b2]
-    # display(lc_fil1)
-    return lc_fil1
+#     b1 = lightcurve['mag'].value - lightcurve['err_mag'].value > mag_sat[fil]
+#     b2 = lightcurve['mag'].value + lightcurve['err_mag'].value < lightcurve['m5']
+#     lc_fil1 = lightcurve[b1&b2]
+#     # display(lc_fil1)
+#     return lc_fil1
+
+def filter_band(lightcurve, m5, fil, flag_col='pass_filter', inplace=False):
+    """
+    Add a boolean flag to the lightcurve indicating which points satisfy:
+      (mag - err_mag) > mag_saturation[fil]  and  (mag + err_mag) < m5.
+    Returns the full lightcurve with the new flag column.
+    """
+    mag_sat = {'W149': 14.8, 'u': 14.7, 'g': 15.7, 'r': 15.8, 'i': 15.8, 'z': 15.3, 'y': 13.9}
+
+    lc = lightcurve if inplace else lightcurve.copy()
+    lc['m5'] = m5
+
+    # Support both Astropy Quantity columns and plain arrays
+    mag = lc['mag'].value if hasattr(lc['mag'], 'value') else lc['mag']
+    err = lc['err_mag'].value if hasattr(lc['err_mag'], 'value') else lc['err_mag']
+
+    # Condition 1: not saturated (1σ brighter than the saturation limit)
+    b1 = (mag - err) > mag_sat[fil]
+    # Condition 2: brighter than the 5σ limiting magnitude
+    b2 = (mag + err) < m5
+
+    # Separate flags for diagnostics
+    lc['sat_ok']   = b1
+    lc['depth_ok'] = b2
+    lc[flag_col]   = b1 & b2  # True only if both conditions are satisfied
+
+    return lc
 
 def has_consecutive_numbers(lst):
     """

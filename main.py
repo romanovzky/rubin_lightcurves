@@ -38,6 +38,7 @@ def cli():
     radius    = params["radius"]              # degrees
     Ds_max    = params["Ds_max"]
     N         = int(params["N"])
+    
     if params["t0_range"]==False:
         t0_range=None
     else:

@@ -15,7 +15,7 @@ t0 = tstart_Roman + 20
 
 
 def event_param(random_seed, data_TRILEGAL, system_type, 
-t0_range, custom_system=None):
+t0_range = None ,custom_system=None):
     # print(f'Generation of parameters: {system_type}')
 
     np.random.seed(random_seed)
@@ -58,14 +58,10 @@ t0_range, custom_system=None):
     tE = event_params.tE()
     piE = event_params.piE()
 
-    if t0_range == None:
-        # min and max value of opsim
-        tstart_rubin =  2460992.515460024
-        tend_rubin = 2464601.5487994165
-        t0 = np.random.uniform(tstart_rubin-0.5*tE.value, tstart_rubin+0.5*tE.value)  
-    else:
+    if t0_range !=None:
         t0 = np.random.uniform(*t0_range)
-
+    else:
+        t0 = None
 
     if system_type == "Planets_systems":
         u0 = rho.value*np.random.uniform(-3,3)

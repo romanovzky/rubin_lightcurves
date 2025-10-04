@@ -109,11 +109,20 @@ def sim_event(i, data, model):
           'i': 27.85, 'z': 27.46, 'y': 26.68}
     Ra, Dec = data['ra'], data['dec']
     my_own_creation, dataSlice, LSST_BandPass = telescope_rubin(i,Ra, Dec)
+
     photParams = set_photometric_parameters(15, 2)
     new_creation = copy.deepcopy(my_own_creation)
     np.random.seed(i)
-    t0 = data['t0']
+    
     tE = data['tE']
+    if data['t0'] == None:
+        ts = dataSlice['observationStartMJD']
+        t0_min = np.percentile(ts, 1) - 0.5 * tE 
+        t0_max = np.percentile(ts, 99) + 0.5 * tE 
+        t0 = np.random.uniform(t0_min, t0_max)
+    else:
+        t0 = data['t0']
+    data['t0'] = t0
 
     if model == 'USBL':
         params = {'t0': data['t0'], 'u0': data['u0'], 'tE': data['tE'], 'rho': data['rho'],
@@ -197,18 +206,18 @@ def sim_event(i, data, model):
         if not len(telo.lightcurve['mag']) == 0:
             Rubin_band = True
     # This first if holds for an event with at least one Roman and Rubin band
-    if Rubin_band:
+    # if Rubin_band:
         # This second if holds for a "detectable" event to fit
-        if filter5points(pyLIMA_parameters, new_creation.telescopes) and deviation_from_constant(pyLIMA_parameters, new_creation.telescopes):
-            print("A good event to fit")
-            return my_own_model, pyLIMA_parameters, True
-        else:
-            print(
-                "Not a good event to fit.\nFail 5 points in t0+-tE\nNot have 3 consecutives points that deviate from constant flux in t0+-tE")
-            return my_own_model, pyLIMA_parameters, False
-    else:
-        print("Not a good event to fit since no Rubin band")
-        return my_own_model, pyLIMA_parameters, False
+        # if filter5points(pyLIMA_parameters, new_creation.telescopes) and deviation_from_constant(pyLIMA_parameters, new_creation.telescopes):
+        #     print("A good event to fit")
+        #     return my_own_model, pyLIMA_parameters, True
+        # else:
+        #     print(
+        #         "Not a good event to fit.\nFail 5 points in t0+-tE\nNot have 3 consecutives points that deviate from constant flux in t0+-tE")
+    return my_own_model, pyLIMA_parameters, True
+    # else:
+    #     print("Not a good event to fit since no Rubin band")
+    #     return my_own_model, pyLIMA_parameters, False
 
 
 def sim_rubin_event(i, system_type, model, TRILEGAL_row, path_to_save_model, t0_range=[2460413.013828608,2460413.013828608+365.25*8]):
@@ -216,9 +225,15 @@ def sim_rubin_event(i, system_type, model, TRILEGAL_row, path_to_save_model, t0_
     seed = i
     
     magstar = TRILEGAL_row
-    event_params = {**magstar, 
-                    **event_param(i, TRILEGAL_row, system_type, t0_range)}
-     
+    if t0_range==None:
+            
+        event_params = {**magstar, 
+                        **event_param(i, TRILEGAL_row, system_type)}
+
+    else:         
+        event_params = {**magstar, 
+                        **event_param(i, TRILEGAL_row, system_type, t0_range)}
+
     my_own_model, pyLIMA_parameters, decision = sim_event(i, event_params, model)
     if decision:
         save_sim(i, path_to_save_model, my_own_model, pyLIMA_parameters, event_params)
