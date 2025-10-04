@@ -132,8 +132,26 @@ we compute the parameters using uniform distributions for the mass of the lens.
 
 Parallax is included by default for these models.
 
+
 ---
 
+## Light Curve Filtering Flags
+
+During the photometric filtering step, each light curve point is evaluated against two conditions:
+
+1. **Saturation check** — the point must not be saturated.  
+2. **Depth check** — the point must be brighter than the 5σ limiting magnitude.
+
+The results are stored as boolean flags in the light curve DataFrame:
+
+| Flag           | Condition                                                   | Description                                                                 |
+|---------------|-------------------------------------------------------------|------------------------------------------------------------------------------|
+| `sat_ok`      | `mag − err_mag > mag_sat[fil]`                              | True if the point is not saturated (1σ fainter than the saturation limit).  |
+| `depth_ok`    | `mag + err_mag < m5`                                        | True if the point is brighter than the 5σ limiting magnitude.               |
+| `pass_filter` | `sat_ok` **AND** `depth_ok`                                 | True only if both conditions are satisfied. Used to select “good” points.   |
+
+These flags make it possible to retain all light curve data while tagging points that pass or fail quality checks, which is useful for diagnostics and later selection.
+---
 ## How It Works
 
 1. **Query TRILEGAL** via Astro Data Lab within `(ra, dec, radius)`, limited by `Ds_max`. Rubin-band mags (u, g, r, i, z, y) are retrieved.
