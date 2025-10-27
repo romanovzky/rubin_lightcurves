@@ -167,6 +167,16 @@ def sim_event(i, data, model):
             "piEE": data["piEE"],
         }
         my_own_model = BS_model.BSmodel(new_creation, parallax=["Full", t0])
+    elif model == "NFW":
+        params = {
+            "t0": data["t0"],
+            "u0": data["u0"],
+            "tE": data["tE"],
+            "t_m": data["t_m"],
+            "piEN": data["piEN"],
+            "piEE": data["piEE"],
+        }
+        my_own_model = NFW_model.NFWmodel(new_creation, parallax=["Full", t0])
 
     my_own_parameters = []
     for key in params:
@@ -302,6 +312,9 @@ def model_rubin(Source, true_model, event_params, model, ORIGIN, lsst_u, lsst_g,
 
     elif model == "BS":
         pyLIMAmodel = BS_model.BSmodel(e, parallax=["Full", t_guess])
+        
+    elif model == "NFW":
+        pyLIMAmodel = NFW_model.NFWmodel(e, parallax=["Full", t_guess])
 
     return pyLIMAmodel
 

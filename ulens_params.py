@@ -86,7 +86,7 @@ t0_range = None ,custom_system=None):
         params_ulens['q'] = q.value
         params_ulens['alpha'] = alpha
 
-    # Add t_m for BS model (generates a random value between 0.5 and 5 days)
+    # Add t_m for BS and NFW models (generates a random value between 0.5 and 5)
     params_ulens['t_m'] = np.random.uniform(0.5, 5.0)
 
     return params_ulens
