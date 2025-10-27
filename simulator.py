@@ -35,12 +35,9 @@ from pyLIMA.outputs import file_outputs
 from ulens_params import microlensing_params, event_param
 import multiprocessing as mul
 import h5py
-from detection_criteria import filter5points, deviation_from_constant, has_consecutive_numbers,
-    mag,
-)
-from extra_models import BS_model
+from detection_criteria import filter5points, deviation_from_constant, has_consecutive_numbers, filter_band, mag
 from read_save import save_sim, read_data
-
+from extra_models import BS_model, NFW_model
 
 home_dir = os.path.expanduser("~")
 
