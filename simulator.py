@@ -35,7 +35,10 @@ from pyLIMA.outputs import file_outputs
 from ulens_params import microlensing_params, event_param
 import multiprocessing as mul
 import h5py
-from detection_criteria import filter5points, deviation_from_constant, has_consecutive_numbers, filter_band, mag
+from detection_criteria import filter5points, deviation_from_constant, has_consecutive_numbers,
+    mag,
+)
+from extra_models import BS_model
 from read_save import save_sim, read_data
 
 
@@ -154,6 +157,16 @@ def sim_event(i, data, model):
         params = {'t0': data['t0'], 'u0': data['u0'], 'tE': data['tE'],
                   'piEN': data['piEN'], 'piEE': data['piEE']}
         my_own_model = PSPL_model.PSPLmodel(new_creation)
+    elif model == "BS":
+        params = {
+            "t0": data["t0"],
+            "u0": data["u0"],
+            "tE": data["tE"],
+            "t_m": data["t_m"],
+            "piEN": data["piEN"],
+            "piEE": data["piEE"],
+        }
+        my_own_model = BS_model.BSmodel(new_creation, parallax=["Full", t0])
 
     my_own_parameters = []
     for key in params:
@@ -284,10 +297,11 @@ def model_rubin(Source, true_model, event_params, model, ORIGIN, lsst_u, lsst_g,
         else:
             pyLIMAmodel = USBL_model.USBLmodel(e, origin=ORIGIN, blend_flux_parameter='ftotal')
 
+    elif model == "PSPL":
+        pyLIMAmodel = PSPL_model.PSPLmodel(e, parallax=["Full", t_guess])
 
-    
-    elif model == 'PSPL':
-        pyLIMAmodel = PSPL_model.PSPLmodel(e, parallax=['Full', t_guess])
+    elif model == "BS":
+        pyLIMAmodel = BS_model.BSmodel(e, parallax=["Full", t_guess])
 
     return pyLIMAmodel
 
